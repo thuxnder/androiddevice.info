@@ -1,0 +1,27 @@
+<resources>
+
+    <color name="android_studio_grey" >#393939</color>
+    <color name="subtext_grey" >#ACACAC</color>
+    <color name="black" >#000000</color>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
+    </style>
+
+    <style name="CustomActionBarTheme"
+        parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowBackground">@color/android_studio_grey</item>
+        <!-- Support library compatibility -->
+        <item name="actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="MyActionBar"
+        parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:background">@drawable/black_background</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@drawable/black_background</item>
+    </style>
+</resources>

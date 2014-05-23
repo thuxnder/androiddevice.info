@@ -1,4 +1,8 @@
 # Built application files
+.gradle
+/local.properties
+/.idea/workspace.xml
+.DS_Store
 *.apk
 *.ap_
 

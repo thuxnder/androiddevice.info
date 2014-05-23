@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Device Inventory Project</string>
+    <string name="action_about">About</string>
+    <string name="action_send">Send</string>
+    <string name="sending">Sending…</string>
+    <string name="success">Data has been sent successfully. Thanks for contributing to this project.</string>
+    <string name="failure">Error while sending data, please check your internet connection and retry.</string>
+    <string name="alreadySent">Data has already been sent.</string>
+    <string name="about">http://www.androiddevice.info/about</string>
+    <string name="submit">http://www.androiddevice.info/submit</string>
+    <string name="email">bugreport@androiddevice.info</string>
+    <string name="subject">android device inventory crash report</string>
+    <string name="crashtitle">Please send Crashreport</string>
+</resources>
