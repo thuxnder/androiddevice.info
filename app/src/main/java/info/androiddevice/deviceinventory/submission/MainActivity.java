@@ -48,6 +48,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerOptions;
     private ActionBarDrawerToggle mDrawerToggle;
+    private MenuItem mSubmitMenuItem;
     private ListView mListView;
     private DeviceInformationListAdapter mInfoAdapter;
     private AlertDialog mAlertDialog;
@@ -63,6 +64,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         mListView = (ListView) findViewById(R.id.container);
         initNavigationDrawer();
+
+        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.black_background));
+
     }
 
     @Override
@@ -85,6 +89,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 submit();
             }
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -116,6 +125,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return true;
         } else if(item.getItemId() == R.id.send){
              submit();
+             mSubmitMenuItem = item;
          }
         return super.onOptionsItemSelected(item);
     }
@@ -131,18 +141,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
-                invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 drawerView.bringToFront();
-                try {
-                    invalidateOptionsMenu();
-                } catch(NoSuchMethodError e) {
-                    e.printStackTrace();
-                }
-
+                supportInvalidateOptionsMenu();
             }
         };
 
@@ -250,4 +255,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             submitted(integer);
         }
     }
+
+    public static class PlaceholderFragment extends Fragment {
+
+        public PlaceholderFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fragment_main, container, false);
+        }
+    }
+
 }
