@@ -48,7 +48,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerOptions;
     private ActionBarDrawerToggle mDrawerToggle;
-    private MenuItem mSubmitMenuItem;
     private ListView mListView;
     private DeviceInformationListAdapter mInfoAdapter;
     private AlertDialog mAlertDialog;
@@ -77,12 +76,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         mListView.setAdapter(mInfoAdapter);
 
         if(!hasBeenSubmitted()) {
-            Boolean autoSubmit = false;
+            Boolean autoSubmit;
             try {
                 ApplicationInfo applicationInfo = getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
-                Bundle bundle = applicationInfo.metaData;
-                autoSubmit = bundle.getBoolean("auto_submit", false);
+                autoSubmit = applicationInfo.metaData.getBoolean("auto_submit", false);
             } catch (PackageManager.NameNotFoundException e) {
+                autoSubmit = false;
+            } catch (NullPointerException e) {
+                autoSubmit = false;
             }
 
             if(autoSubmit) {
@@ -125,7 +126,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return true;
         } else if(item.getItemId() == R.id.send){
              submit();
-             mSubmitMenuItem = item;
          }
         return super.onOptionsItemSelected(item);
     }
@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         builder.setCancelable(false).setView(alertLayout).setNegativeButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ((AlertDialog)dialog).dismiss();
+                dialog.dismiss();
             }
         });
         mAlertDialog = builder.show();
@@ -255,17 +255,4 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             submitted(integer);
         }
     }
-
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main, container, false);
-        }
-    }
-
 }
