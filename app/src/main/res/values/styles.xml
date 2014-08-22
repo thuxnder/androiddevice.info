@@ -8,7 +8,7 @@
         parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowBackground">@color/android_studio_grey</item>
         <!-- Support library compatibility -->
-        <item name="actionBarStyle">@style/MyActionBar</item>
+        <!--<item name="actionBarStyle">@style/MyActionBar</item>-->
     </style>
 
     <!-- ActionBar styles -->

@@ -2,6 +2,8 @@
 <resources>
     <color name="black_pressed">#CC000000</color>
     <color name="black_disabled">#DD000000</color>
-    <color name="android_studio_grey" >#393939</color>
     <color name="subtext_grey" >#ACACAC</color>
+    <color name="subtext_grey_faded" >#33ACACAC</color>
+    <color name="android_studio_grey" >#393939</color>
+    <color name="black" >#FF000000</color>
 </resources>

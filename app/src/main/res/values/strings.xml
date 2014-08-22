@@ -12,4 +12,6 @@
     <string name="email">bugreport@androiddevice.info</string>
     <string name="subject">android device inventory crash report</string>
     <string name="crashtitle">Please send Crashreport</string>
+    <string name="device_name_dialog_title">Enter Your Device Name</string>
+
 </resources>

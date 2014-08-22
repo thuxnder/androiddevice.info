@@ -1,8 +1,5 @@
 <resources>
 
-    <color name="android_studio_grey" >#393939</color>
-    <color name="black" >#FF000000</color>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
 
