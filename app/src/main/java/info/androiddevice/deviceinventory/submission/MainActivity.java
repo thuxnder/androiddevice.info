@@ -13,14 +13,19 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,6 +38,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -51,6 +57,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private ListView mListView;
     private DeviceInformationListAdapter mInfoAdapter;
     private AlertDialog mAlertDialog;
+    private String mDeviceName;
 
 
     @Override
@@ -62,10 +69,95 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         mDrawerOptions = (ListView) findViewById(R.id.left_drawer);
 
         mListView = (ListView) findViewById(R.id.container);
+//        mListView.setItemsCanFocus(true);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                if(position == 0){
+                   showDeviceNameInputDialog();
+
+                } else {
+                    final TextView value = ((TextView) view.findViewById(android.R.id.text2));
+                    if (value.getVisibility() != View.GONE) {
+                        if (value.getEllipsize() == TextUtils.TruncateAt.END) {
+                            value.setMaxLines(Integer.MAX_VALUE);
+                            value.setEllipsize(null);
+                        } else {
+                            value.setMaxLines(DeviceInformationListAdapter.MAX_LINES);
+                            value.setEllipsize(TextUtils.TruncateAt.END);
+                        }
+                    }
+                }
+            }
+        });
         initNavigationDrawer();
 
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.black_background));
 
+
+    }
+
+    /**
+     * Creates and displays a dialog for the user to enter his or her device name
+     */
+    private void showDeviceNameInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        final AlertDialog dialog = builder.setView(LayoutInflater.from(MainActivity.this)
+                .inflate(R.layout.device_name_input, null, false))
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText editText = (EditText) ((AlertDialog)dialog).findViewById(R.id.editable);
+                        mDeviceName = editText.getText().toString();
+                        mInfoAdapter.setDeviceName(mDeviceName);
+                        settings.edit().putString("deviceName", mDeviceName).commit();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
+        buttonStyleHelper(dialog.getButton(DialogInterface.BUTTON_NEGATIVE));
+        final Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        EditText editText = (EditText) dialog.findViewById(R.id.editable);
+        if(null == mDeviceName || 0 == mDeviceName.length()){
+            positiveButton.setEnabled(false);
+        } else {
+            editText.setText(mDeviceName);
+        }
+        buttonStyleHelper(positiveButton);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                positiveButton.setEnabled(count > 0);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
+        editText.requestFocus();
+    }
+
+    private void buttonStyleHelper(Button b){
+        b.setBackgroundResource(R.drawable.black_background_state);
+        b.setTextColor(getResources().getColor(android.R.color.white));
     }
 
     @Override
@@ -73,6 +165,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         super.onResume();
         JSONObject deviceInformation = DeviceInformation.getInstance().getDeviceInformation();
         mInfoAdapter = new DeviceInformationListAdapter(MainActivity.this, deviceInformation);
+        mDeviceName = settings.getString("deviceName", null);
+        mInfoAdapter.setDeviceName(mDeviceName);
         mListView.setAdapter(mInfoAdapter);
 
         if(!hasBeenSubmitted()) {
@@ -152,7 +246,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         };
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.list_item, new String[]{getString(R.string.action_about), getString(R.string.action_send)});
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+                R.layout.list_item, new String[]{getString(R.string.action_about), getString(R.string.action_send)});
 
         mDrawerOptions.setAdapter(adapter);
         mDrawerOptions.setOnItemClickListener(MainActivity.this);
@@ -233,8 +328,16 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             try {
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost(getString(R.string.submit));
+                final JSONObject deviceInformation = DeviceInformation.getInstance().getDeviceInformation();
+                if(null != mDeviceName && 0 != mDeviceName.length()) {
+                    try {
+                        deviceInformation.put("name", mDeviceName);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
                 List<NameValuePair> body = new ArrayList<NameValuePair>() {{
-                    add(new BasicNameValuePair("device", DeviceInformation.getInstance().getDeviceInformation().toString()));
+                    add(new BasicNameValuePair("device", deviceInformation.toString()));
                 }};
                 httpPost.setEntity(new UrlEncodedFormEntity(body));
                 HttpResponse response = httpClient.execute(httpPost);
@@ -255,4 +358,5 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             submitted(integer);
         }
     }
+
 }

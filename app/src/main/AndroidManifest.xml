@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="info.androiddevice.deviceinventory.submission"
     android:versionCode="2"
     android:versionName="1.1" >
-    <uses-sdk android:minSdkVersion="8"/>
 
     <application
         android:name="info.androiddevice.deviceinventory.Application"
+        tools:replace="allowBackup"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
