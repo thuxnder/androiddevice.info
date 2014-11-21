@@ -1,15 +1,13 @@
 package info.androiddevice.deviceinventory.info;
 
 
+import android.os.Build;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-
-import libcore.io.Libcore;
-import libcore.io.Os;
-import libcore.io.StructStat;
 
 import static info.androiddevice.deviceinventory.info.Utils.readFile;
 
@@ -64,9 +62,32 @@ public class DirProperty implements Property {
         }
     }
 
-    private StructStat getFileInfo(File file) throws Exception, IllegalAccessError {
-        Os os = Libcore.os;
-        StructStat fileInfo = os.lstat(file.getAbsolutePath());
-        return fileInfo;
+    private StructStat getFileInfo(File file) throws Exception {
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            libcore.io.Os os = libcore.io.Libcore.os;
+            libcore.io.StructStat fileInfo = os.lstat(file.getAbsolutePath());
+            return new StructStat(fileInfo);
+        } else {
+            android.system.StructStat fileInfo = android.system.Os.lstat(file.getAbsolutePath());
+            return new StructStat(fileInfo);
+        }
+    }
+
+    private static class StructStat {
+        public final int st_uid;
+        public final int st_gid;
+        public final int st_mode;
+
+        public StructStat(libcore.io.StructStat info) {
+            this.st_uid = info.st_uid;
+            this.st_gid = info.st_gid;
+            this.st_mode = info.st_mode;
+        }
+
+        public StructStat(android.system.StructStat info) {
+            this.st_uid = info.st_uid;
+            this.st_gid = info.st_gid;
+            this.st_mode = info.st_mode;
+        }
     }
 }

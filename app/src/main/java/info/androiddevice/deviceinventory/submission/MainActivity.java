@@ -1,6 +1,7 @@
 package info.androiddevice.deviceinventory.submission;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,14 +9,15 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,21 +32,17 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 import info.androiddevice.deviceinventory.Application;
 import info.androiddevice.deviceinventory.DeviceInformation;
@@ -58,6 +56,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private DeviceInformationListAdapter mInfoAdapter;
     private AlertDialog mAlertDialog;
     private String mDeviceName;
+    OkHttpClient client = new OkHttpClient();
 
 
     @Override
@@ -69,7 +68,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         mDrawerOptions = (ListView) findViewById(R.id.left_drawer);
 
         mListView = (ListView) findViewById(R.id.container);
-//        mListView.setItemsCanFocus(true);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -280,14 +278,25 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             button.setEnabled(true);
         } else {
             button.setEnabled(false);
-            HttpClientTask httpClientTask = new HttpClientTask();
-            httpClientTask.execute();
+
+            final JSONObject deviceInformation = DeviceInformation.getInstance().getDeviceInformation();
+            if(null != mDeviceName && 0 != mDeviceName.length()) {
+                try {
+                    deviceInformation.put("name", mDeviceName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            RequestBody formBody = new FormEncodingBuilder().add("device", deviceInformation.toString()).build();
+            Request request = new Request.Builder().url(getString(R.string.submit)).addHeader("User-Agent", "APP").post(formBody).build();
+            client.newCall(request).enqueue(new HTTPCallback(this.getApplication()));
         }
     }
 
-    protected void submitted(Integer errorCode) {
+    protected void submitted(boolean successful) {
         mAlertDialog.findViewById(R.id.sending_progressbar).setVisibility(View.GONE);
-        if(errorCode==200) {
+        if(successful) {
             ((TextView)mAlertDialog.findViewById(android.R.id.text1)).setText(R.string.success);
             setBeenSubmitted(true);
         } else {
@@ -321,41 +330,38 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
 
-    private class HttpClientTask extends AsyncTask<Void, Void, Integer> {
+    class HTTPCallback implements Callback {
+        private Handler mainHandler;
+
+        public HTTPCallback(Context context) {
+            super();
+            mainHandler = new Handler(context.getMainLooper());
+        }
+
 
         @Override
-        protected Integer doInBackground(Void... voids) {
-            try {
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(getString(R.string.submit));
-                final JSONObject deviceInformation = DeviceInformation.getInstance().getDeviceInformation();
-                if(null != mDeviceName && 0 != mDeviceName.length()) {
-                    try {
-                        deviceInformation.put("name", mDeviceName);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        public void onFailure(Request request, IOException e) {
+            mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.this.submitted(false);
                     }
-                }
-                List<NameValuePair> body = new ArrayList<NameValuePair>() {{
-                    add(new BasicNameValuePair("device", deviceInformation.toString()));
-                }};
-                httpPost.setEntity(new UrlEncodedFormEntity(body));
-                HttpResponse response = httpClient.execute(httpPost);
-                return response.getStatusLine().getStatusCode();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return -1;
+                });
         }
 
         @Override
-        protected void onPostExecute(Integer integer) {
-            super.onPostExecute(integer);
-            submitted(integer);
+        public void onResponse(final Response response) {
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    MainActivity.this.submitted(response.isSuccessful());
+                    try {
+                        Log.d("HTTPCallback", response.body().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 

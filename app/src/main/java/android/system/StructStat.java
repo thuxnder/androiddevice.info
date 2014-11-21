@@ -1,4 +1,4 @@
-package libcore.io;
+package android.system;
 
 public class StructStat {
     public final long st_dev;

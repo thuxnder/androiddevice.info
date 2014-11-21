@@ -10,14 +10,14 @@ android {
         }
     }
 
-    compileSdkVersion 19
-    buildToolsVersion '19.1'
+    compileSdkVersion 21
+    buildToolsVersion '21.0.0'
 
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
         versionCode 2
-        versionName "1.0"
+        versionName '1.0'
     }
     buildTypes {
         release {
