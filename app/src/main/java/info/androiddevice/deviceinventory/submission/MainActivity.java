@@ -355,11 +355,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 @Override
                 public void run() {
                     MainActivity.this.submitted(response.isSuccessful());
-                    try {
-                        Log.d("HTTPCallback", response.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             });
         }
