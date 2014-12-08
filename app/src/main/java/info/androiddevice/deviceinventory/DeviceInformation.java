@@ -17,6 +17,7 @@ import info.androiddevice.deviceinventory.info.JavaSystemProperty;
 import info.androiddevice.deviceinventory.info.MeminfoProperty;
 import info.androiddevice.deviceinventory.info.MountsProperty;
 import info.androiddevice.deviceinventory.info.Property;
+import info.androiddevice.deviceinventory.info.SharedLibraryNamesProperty;
 import info.androiddevice.deviceinventory.info.UsbProperty;
 import info.androiddevice.deviceinventory.info.VersionProperty;
 
@@ -47,6 +48,7 @@ public class DeviceInformation {
         addProperty(jsonObject, new OtacertsProperty());
         addProperty(jsonObject, new DirProperty());
         addProperty(jsonObject, new VersionProperty());
+        addProperty(jsonObject, new SharedLibraryNamesProperty());
         addProperty(jsonObject, new NameProperty());
 
         return jsonObject;
@@ -59,7 +61,6 @@ public class DeviceInformation {
         try {
             jsonObject.put(property.getName(), property.getProperty());
         } catch (JSONException e) {
-        //} catch (Exception e) {
             try {
                 jsonObject.put(property.getName(), JSONObject.NULL);
             } catch (JSONException e1) {

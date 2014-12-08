@@ -351,10 +351,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         @Override
         public void onResponse(final Response response) {
+            final boolean result = response.isSuccessful();
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    MainActivity.this.submitted(response.isSuccessful());
+                    MainActivity.this.submitted(result);
                 }
             });
         }
