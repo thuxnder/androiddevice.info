@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">设备目录</string>
+    <string name="action_about">关于</string>
+    <string name="action_send">发送</string>
+    <string name="sending">发送中…</string>
+    <string name="success">数据已经发送成功,感谢您对本项目的贡献。</string>
+    <string name="failure">发送出错，请检查网络后重试。</string>
+    <string name="alreadySent">数据已经被发送。</string>
+    <string name="about">http://www.androiddevice.info/about</string>
+    <string name="submit">http://www.androiddevice.info/submit</string>
+    <string name="email">bugreport@androiddevice.info</string>
+    <string name="subject">android device inventory crash report</string>
+    <string name="crashtitle">Please send Crashreport</string>
+    <string name="device_name_dialog_title">请输入您的设备名称</string>
+
+</resources>
